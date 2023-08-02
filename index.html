@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IMDB Clone</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div id="search-bar"> 
-        <h1>IMDb</h1>
+    <!-- search bar container -->
+    <div id="search-bar">
+        <!-- imdb logo -->
+        <h1>IMDb</h1> 
+        <!-- form to submit user input and get results from API  -->
         <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search for a movie..." >
+            <input type="text" id="search-input" placeholder="Search for a movie...">
         </form>
     </div>
     <div>
+        <!-- title category heading -->
         <h1 id="category-title">Now Playing Movies</h1>
     </div>
     <div id="movies-grid"> </div>
@@ -21,4 +27,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

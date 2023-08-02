@@ -1,3 +1,4 @@
+/* search bar css */
 #search-bar {
     margin-left: 20vw;
     display: flex;
@@ -18,7 +19,7 @@
     border: 5px;
 }
 
-/* create movies card grid */
+/* movie card css */
 #movies-grid {
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
@@ -47,16 +48,19 @@
 .movie-card a {
     text-decoration: none;
     color: lightgray;
+    cursor:pointer;
 }
 
 .movie-card img {
     width: 100%;
 }
 
+/* background color */
 body {
     background: #121212;
 }
 
+ /* movie grid css */
 #movies-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -65,6 +69,8 @@ body {
     width: 60%;
     margin: 2rem 0 2rem 20vw;
 }
+
+/* category title css */
 
 #category-title {
     margin-left: 20vw;
