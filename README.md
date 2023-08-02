@@ -13,7 +13,7 @@ This  App is a simple web application that allows users to search for movies and
 
 ## Demo
 
-[Live Demo](https://example.com/moviedb)
+[Live Demo]( https://manojbinwal.github.io/IMDB_Clone_CN/)
 
 ## Technologies Used
 
