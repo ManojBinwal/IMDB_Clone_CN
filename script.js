@@ -1,85 +1,128 @@
-// API endpoints and key for The Movie Database API
-const apiBaseUrl = "https://api.themoviedb.org/3/";
-const apiKey = "d6bd8af122f2b68bc1dee55e05623e10";
+// this is the api key
+const APIKEY = 'api_key=96c05c6f53c2f9b20b3e42af4887dc76';
+// this is the home url 
+const HOMEURL = `https://api.themoviedb.org/3/discover/movie?${APIKEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_watch_monetization_types=flatrate`;
+// this is the image url 
+const IMAGEURL = 'https://image.tmdb.org/t/p/w500';
 
-// Base URL for movie poster images
-const imageBaseUrl = "https://image.tmdb.org/t/p/w300";
+// fetching elements from indexedDB.html 
+var container = document.getElementById('movie-container');
+var search = document.getElementById('searchMovie');
+var wrapperDiv = document.querySelector('.search-conten');
+var resultsDiv = document.querySelector('.results');
 
-// DOM elements
-const moviesGrid = document.getElementById("movies-grid"); // Container for displaying movie cards
-const searchInput = document.getElementById("search-input"); // Input field for search queries
-const searchForm = document.getElementById("search-form"); // Search form element
-const categoryTitle = document.getElementById("category-title"); // Heading for movie category titles
 
-// Fetch movies currently playing in theaters
-async function fetchMoviesNowPlaying() {
-  const response = await fetch(
-    `${apiBaseUrl}/movie/now_playing?api_key=${apiKey}`
-  );
-  const jsonResponse = await response.json();
-  const movies = await Promise.all(
-    jsonResponse.results.map(async (movie) => ({
-      id: movie.id,
-      title: movie.title,
-      poster_path: movie.poster_path,
-      vote_average: movie.vote_average,
-      IMDbId: await getIMDbId(movie.id),
-    }))
-  );
-  displayMovies(movies);
+// this is the previous button
+var pBtn = document.getElementById('prev-page');
+// this is the next button
+var nBtn = document.getElementById('next-page');
+// count of pages 
+let pageNumber = 1;
+
+// calling function to request api 
+apiCall(HOMEURL);
+// this is the function to get api data 
+function apiCall(url){
+    const x = new XMLHttpRequest();
+    x.open('get',url);
+    x.send();
+    x.onload = function(){
+        container.innerHTML="";
+        var res = x.response;
+        // resp to JSON data 
+        var conJson = JSON.parse(res);
+        // array of movies 
+        var moviesArray = conJson.results;
+        // create the movie cards here 
+        moviesArray.forEach(movie => moviesElement(movie));
+        addMovieToListButtonArray = document.getElementsByClassName('.add-movie-to-list');
+    }
+}
+// create the home page elements 
+function moviesElement(movie){
+    var movieElement = document.createElement('div');
+    movieElement.classList.add('movie-element');
+    movieElement.innerHTML = `
+        <div class="movie-poster">
+            <a href="moviePage.html?id=${movie.id}"><img src= ${IMAGEURL+movie.poster_path} alt="Movie Poster"></a>
+        </div>
+        <div class="movie-title">${movie.title}</div>
+        <div class="movie-element-tags">
+            <div class="movie-rating">
+            <i class="fas fa-star"></i> ${movie.vote_average} 
+            </div>
+            <div class="add-movie-to-list"  id="${movie.id}" onclick="addMovie(${movie.id})">
+                <i class="fas fa-plus"></i>
+            </div>
+        </div>
+    `;
+    container.appendChild(movieElement);
 }
 
-// Display movies on the webpage
-function displayMovies(movies) {
-  moviesGrid.innerHTML = movies
-    .map(
-      (movie) => `
-      <div class="movie-card">
-        <a href="https://www.imdb.com/title/${movie.IMDbId}/"> 
-          <img src="${imageBaseUrl}${movie.poster_path}" />
-          <p>⭐ ${movie.vote_average}</p>
-          <h1>${movie.title}</h1>
-        </a>
-      </div>`
-    )
-    .join(""); // Convert the array of strings derived from the map into a single string to use with innerHTML
+
+// array to store fav movies 
+var favMovies=[];
+var oldMovies=[];
+
+// function to add movie to fav list 
+function addMovie(btnId){
+    document.getElementById(btnId).innerHTML = '<i class="fas fa-check"></i>';
+    // to avoid duplicate movies 
+    if(!favMovies.includes(btnId.toString())){
+        favMovies.push(btnId.toString());
+    }
+
+    // getting array from local storage  
+    oldMovies = JSON.parse(localStorage.getItem('MovieArray'));
+    if(oldMovies==null){
+        // if empty 
+        localStorage.setItem('MovieArray', JSON.stringify(favMovies));
+    }else{
+        // if not empty 
+        favMovies.forEach(item=>{
+            if(!oldMovies.includes(item)){
+                oldMovies.push(item);
+            }
+        })
+        // adding the movie in local storage 
+        localStorage.setItem('MovieArray', JSON.stringify(oldMovies));
+    }
 }
 
-// Handle search form submission
-function handleSearchFormSubmit(event) {
-  event.preventDefault();
-  categoryTitle.innerHTML = "Search Results";
-  const searchQuery = searchInput.value;
-  searchMovies(searchQuery);
+// this is the search function 
+search.addEventListener('keyup', function(){
+    // input char in the search box
+    var input = search.value;
+    // getting all the movies related to the input in the search option 
+    var inputUrl = `https://api.themoviedb.org/3/search/movie?query=${input}&${APIKEY}`;
+    if(input.length !=0){
+        apiCall(inputUrl);
+    }else{
+        window.location.reload();
+    }
+})
+
+// disable the prev btn when the page is 1
+pBtn.disabled = true;
+function disablePBtn(){
+    if(pageNumber ==1)pBtn.disabled=true;
+    else pBtn.disabled=false;
 }
 
-// Search movies based on the given query
-async function searchMovies(query) {
-  const response = await fetch(
-    `${apiBaseUrl}/search/movie?api_key=${apiKey}&query="${query}"`
-  );
-  const jsonResponse = await response.json();
-  const movies = jsonResponse.results;
-  displayMovies(movies);
-}
+// got to next page 
+nBtn.addEventListener('click',()=>{
+    pageNumber++;
+    let tempURL = `https://api.themoviedb.org/3/discover/movie?${APIKEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${pageNumber}&with_watch_monetization_types=flatrate`;
+    apiCall(tempURL);
+    disablePBtn();
+});
 
-// Fetch the IMDb ID of a movie based on its TMDB ID
-async function getIMDbId(movieId) {
-  const response = await fetch(
-    `${apiBaseUrl}/movie/${movieId}/external_ids?api_key=${apiKey}`
-  );
-  const jsonResponse = await response.json();
-  return jsonResponse.imdb_id;
-}
+// gor to prev page 
+pBtn.addEventListener('click',()=>{
+    if(pageNumber==1)return;
 
-// Search movies with the query "Batman" (you can replace this with any other query)
-searchMovies("Batman");
-
-// Add event listener to handle form submissions
-searchForm.addEventListener("submit", handleSearchFormSubmit);
-
-// Fetch and display movies currently playing in theaters
-fetchMoviesNowPlaying();
-
-// Example of getting the IMDb ID for the movie with TMDB ID 550 (commented out since it's not currently in use)
-// console.log(getIMDbId(550));
+    pageNumber--;
+    let tempURL = `https://api.themoviedb.org/3/discover/movie?${APIKEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${pageNumber}&with_watch_monetization_types=flatrate`;
+    apiCall(tempURL);
+    disablePBtn();
+})
