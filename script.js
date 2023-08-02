@@ -12,10 +12,17 @@ const categoryTitle = document.getElementById("category-title");
 async function fetchMoviesNowPlaying() {
   const response = await fetch(
     `${apiBaseUrl}/movie/now_playing?api_key=${apiKey}`
-  ); // store the result in response //
-  const jsonResponse = await response.json(); //convert the response to JSON //
-  const movies =
-    jsonResponse.results; // store the result attribute from JSON  in movies //
+  ); 
+  const jsonResponse = await response.json();
+  const movies = await Promise.all (
+    jsonResponse.results.map(async (movie) => ({
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        vote_average: movie,
+        IMDbId: await getIMDbId(movie.id)
+  }))
+  )
   displayMovies(movies);
 }
 
@@ -25,6 +32,7 @@ function displayMovies(movies) {
     .map(
       (movie) =>
         ` <div class = "movie-card">
+        <a href = "https://www.imdb.com/title/${movie.IMDbId}/"> 
         <img src = "${imageBaseUrl}${movie.poster_path}"/>
         <p>⭐${movie.vote_average}</p>
         <h1>${movie.title}</h1>
@@ -55,7 +63,16 @@ async function searchMovies(query) {
     displayMovies(movies);
 }
 
+async function getIMDbId(movieId){
+    const response = await fetch(`${apiBaseUrl}/movie/${movieId}/external_ids?api_key=${apiKey}`);
+    const jsonResponse = await response.json();
+    return jsonResponse.imdb_id;
+
+}
+
 searchMovies("Batman");
 
 searchForm.addEventListener("submit", handleSearchFormSubmit);
 fetchMoviesNowPlaying(); 
+
+// console.log(getIMDbId(550))

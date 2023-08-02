@@ -44,6 +44,11 @@
     font-weight: lightgray;
 }
 
+.movie-card a {
+    text-decoration: none;
+    color: lightgray;
+}
+
 .movie-card img {
     width: 100%;
 }
