@@ -41,7 +41,7 @@ body{
     box-shadow: 0 28px 9px 0 rgba(0,0,0,0.2);
 }
 .movie-duration i{
-    color: lightblue;
+    color: rgb(239, 245, 247);
 }
 .movie-details > *{
     margin: 20px 50px;
@@ -49,7 +49,7 @@ body{
 }
 /* movie name */
 .title{
-    color: rgb(233, 40, 98);
+    color: rgba(255, 100, 155, 0.425);
     margin: 20px 0px;
     font-size: 4rem;
     font-weight: bolder;
@@ -62,7 +62,7 @@ body{
     transition: all .2s ease;
 }
 .trailer-div i{
-    color: red;
+    color: rgb(202, 19, 19);
 }
 #trailer-video-div{
     position: fixed;
