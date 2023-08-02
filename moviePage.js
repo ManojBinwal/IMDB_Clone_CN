@@ -1,80 +1,127 @@
-// API key, base URL, and image URL for the Movie Database API
-const API_KEY = 'api_key=d6bd8af122f2b68bc1dee55e05623e10';
-const BASE_URL = 'https://api.themoviedb.org/3';
-const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
+// this is the api key, base url and image url
+const APIKEY = 'api_key=96c05c6f53c2f9b20b3e42af4887dc76';
+const BASEURL = 'https://api.themoviedb.org/3';
+const IMAGEURL = 'https://image.tmdb.org/t/p/w500';
 
-// Get the movie id from the URL parameter
-let movieId = '';
+// geting the movie id and details
+let id = '';
 const urlParams = new URLSearchParams(location.search);
-for (const [key, value] of urlParams) {
-    movieId = value;
+for(const [key, value]of urlParams){
+    id = value;
 }
 
-// Construct the API URL for the movie details
-let movieDetailsUrl = `/movie/${movieId}?language=en-US&append_to_response=videos&`;
-let fullUrl = BASE_URL + movieDetailsUrl + API_KEY;
+let link = `/movie/${id}?language=en-US&append_to_response=videos&`;
+let f_url = BASEURL+link+APIKEY;
 
-// Call the API to get the movie details
-apiCall(fullUrl);
+apiCall(f_url);
 
-// Function to make an API call using XMLHttpRequest
-function apiCall(url) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('get', url);
-    xhr.send();
-    xhr.onload = function () {
-        document.getElementById('movie-display').innerHTML = '';
-        const response = xhr.response;
-        const jsonData = JSON.parse(response);
-        getMovies(jsonData);
-    };
-    xhr.onerror = function () {
-        window.alert('Failed to retrieve data');
-    };
+// function to create element 
+function apiCall(url){
+    const x = new XMLHttpRequest();
+    x.open('get',url);
+    x.send();
+    x.onload = function(){
+        document.getElementById('movie-display').innerHTML='';
+        var res=x.response;
+        var Json = JSON.parse(res);
+        getMovies(Json);
+    }
+    x.onerror =function(){
+        window.alert('cannot get')
+    }
 }
 
-// Function to display movie details on the movie details page
-function getMovies(movieData) {
-    // Get the movie YouTube trailer link
-    const movieTrailer = movieData.videos.results.filter(filterTrailer);
-
-    // Set the background image for the page
-    document.body.style.backgroundImage = `url(${IMAGE_URL + movieData.backdrop_path}), linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0) 250%)`;
-
-    // Create a div for the movie details
-    const movieDiv = document.createElement('div');
+// this function take the json data and display it on the movies details page 
+function getMovies(myJson){
+    // get the movie youtube link 
+    var MovieTrailer = myJson.videos.results.filter(filterArray);
+    // get the background image for the page 
+    document.body.style.backgroundImage = `url(${IMAGEURL+myJson.backdrop_path}), linear-gradient(rgba(0,0,0,1), rgba(0,0,0,0) 250%)`;
+    var movieDiv = document.createElement('div');
     movieDiv.classList.add('each-movie-page');
 
-    // Set the YouTube trailer URL
-    let youtubeURL;
-    if (movieTrailer.length === 0) {
-        youtubeURL = movieData.videos.results.length === 0 ? '' : `https://www.youtube.com/embed/${movieData.videos.results[0].key}`;
-    } else {
-        youtubeURL = `https://www.youtube.com/embed/${movieTrailer[0].key}`;
+    // setting the youtube link 
+    var youtubeURL;
+    if(MovieTrailer.length==0){
+        if(myJson.videos.results.length ==0){
+            youtubeURL='';
+        }else{
+            youtubeURL = `https://www.youtube.com/embed/${myJson.videos.results[0].key}`;
+        }
+    }else{
+        youtubeURL = `https://www.youtube.com/embed/${MovieTrailer[0].key}`;
     }
 
-    // Create the HTML for the movie details page
+    // html for the movie details page 
     movieDiv.innerHTML = `
         <div class="movie-poster">
-            <img src=${IMAGE_URL + movieData.poster_path} alt="Poster">
+            <img src=${IMAGEURL+myJson.poster_path} alt="Poster">
         </div>
-        <!-- Other movie details (title, tagline, duration, release date, rating, etc.) -->
-        <!-- ... -->
+        <div class="movie-details">
+            <div class="title">
+                ${myJson.title}
+            </div>
+
+            <div class="tagline">${myJson.tagline}</div>
+
+            <div style="display: flex;"> 
+                <div class="movie-duration">
+                    <b><i class="fas fa-clock"></i></b> ${myJson.runtime}
+                </div>
+                <div class="release-date">
+                    <b>Raleased</b>: ${myJson.release_date}
+                </div>
+            </div>
+
+            <div class="rating">
+                <b>IMDb Rating</b>: ${myJson.vote_average}
+            </div>
+
+            <div class="trailer-div" id="trailer-div-btn">
+                <i class="fab fa-youtube"></i>
+            </div>
+
+            <div id="trailer-video-div">
+                <button id="remove-video-player"><i class="fas fa-times"></i></button>
+                <br>
+                <span><iframe width="560" height="315" src=${youtubeURL} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></span>
+                
+            </div>
+    
+            <div class="plot">
+                ${myJson.overview}
+            </div>
+        </div>
     `;
 
-    // Append the movie details div to the movie-display container
     document.getElementById('movie-display').appendChild(movieDiv);
 
-    // Add event listeners to play and stop the YouTube video
-    // ...
+    // play the youtube video 
+    var youtubeVideo = document.getElementById('trailer-video-div');
+    document.getElementById('trailer-div-btn').addEventListener('click', function(){
+        youtubeVideo.style.display = 'block';
+    });
+    // stop the youtube video 
+    document.getElementById('remove-video-player').addEventListener('click', function(){
+        stopVideo();
+        youtubeVideo.style.display = 'none';
+    })
+
+    // function to stop the youtube Video
+    function stopVideo(){
+        var iframe =document.getElementsByTagName("iframe")[0];
+        var url = iframe.getAttribute('src');
+        iframe.setAttribute('src', '');
+        iframe.setAttribute('src', url);
+    }
 
 }
 
-// Function to filter the video for the movie trailer
-function filterTrailer(obj) {
-    const videoTitle = obj.name;
-    const regex = /Official Trailer/i;
-    if (videoTitle.match(regex)) {
+// filter array for video 
+function filterArray(obj){
+    var vtitle = obj.name 
+    var rg = /Official Trailer/i;
+    if(vtitle.match(rg)){
         return obj;
     }
 }
